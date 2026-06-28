@@ -286,8 +286,11 @@ def test_discord():
         "status": "pendiente",
         "date": datetime.now().isoformat()
     }
-    send_discord(test_order)
-    return "Discord test enviado, mira tu Discord"
+    try:
+        send_discord(test_order)
+        return "Discord test enviado, mira tu Discord"
+    except Exception as e:
+        return f"ERROR: {e}", 500
 
 
 if __name__ == "__main__":
