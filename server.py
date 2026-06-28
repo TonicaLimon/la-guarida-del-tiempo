@@ -127,10 +127,17 @@ def send_discord(order):
             data=data,
             headers={"Content-Type": "application/json"}
         )
-        with urllib.request.urlopen(req, timeout=10):
-            app.logger.info(f"Discord notif enviado para pedido {order['id']}")
+        response = urllib.request.urlopen(req, timeout=10)
+        app.logger.info(f"Discord OK: {response.status} para pedido {order['id']}")
+    except urllib.error.HTTPError as e:
+        app.logger.error(f"Discord HTTP error: {e.code} - {e.reason}")
+        try:
+            error_body = e.read().decode("utf-8")
+            app.logger.error(f"Discord response: {error_body}")
+        except:
+            pass
     except Exception as e:
-        app.logger.error(f"Error Discord: {e}")
+        app.logger.error(f"Error Discord: {type(e).__name__} - {e}")
 
 
 @app.route("/")
@@ -288,9 +295,9 @@ def test_discord():
     }
     try:
         send_discord(test_order)
-        return "Discord test enviado, mira tu Discord"
+        return "Discord test enviado, mira tu Discord (revisa logs si no llega)"
     except Exception as e:
-        return f"ERROR: {e}", 500
+        return f"ERROR: {type(e).__name__}: {e}", 500
 
 
 if __name__ == "__main__":
