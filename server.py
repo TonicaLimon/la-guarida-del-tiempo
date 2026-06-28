@@ -20,7 +20,7 @@ GMAIL_PASS = os.getenv("GMAIL_PASS", "")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 
-YOUR_DOMAIN = "http://192.168.0.32:8080"
+YOUR_DOMAIN = os.getenv("YOUR_DOMAIN", "http://192.168.0.32:8080")
 
 
 def load_orders():
@@ -210,4 +210,5 @@ def get_orders():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=False)
+    port = int(os.getenv("PORT", 8080))
+    app.run(host="0.0.0.0", port=port, debug=False)
