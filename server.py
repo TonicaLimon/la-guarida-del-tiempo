@@ -275,6 +275,21 @@ def test_email():
         return f"ERROR SMTP: {e}", 500
 
 
+@app.route("/test-discord")
+def test_discord():
+    test_order = {
+        "id": "TEST001",
+        "type": "reserve",
+        "customer": {"name": "Test Cliente", "email": "test@test.com", "phone": "+34600000000"},
+        "items": [{"name": "Dragon del Vacio Atemporal", "price": "1200", "type": "legendary"}],
+        "total": 1200,
+        "status": "pendiente",
+        "date": datetime.now().isoformat()
+    }
+    send_discord(test_order)
+    return "Discord test enviado, mira tu Discord"
+
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
