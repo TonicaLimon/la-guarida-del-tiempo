@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+orders.json
+pending_*.json
+.vbs
+*.swp
+.DS_Store
+Thumbs.db
+.env

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedido confirmado — La Guarida del Tiempo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0;padding:0;box-sizing:border-box }
+body {
+  font-family:'Inter',sans-serif;
+  background:#111016;
+  color:#f0ead6;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px
+}
+.card {
+  background:#18181f;
+  border:1px solid rgba(201,164,75,0.2);
+  border-radius:16px;padding:48px;
+  text-align:center;max-width:480px;width:100%
+}
+.icon {
+  font-size:4rem;margin-bottom:20px;
+  animation: pop 0.5s cubic-bezier(0.4,0,0.2,1)
+}
+@keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+h1 {
+  font-family:'Playfair Display',serif;
+  font-size:2rem;color:#c9a44b;margin-bottom:12px
+}
+p { color:#9a94a8;margin-bottom:8px;font-size:1.05rem }
+.ref {
+  font-family:'Playfair Display',serif;
+  font-size:1.3rem;color:#c9a44b;margin:16px 0
+}
+a {
+  display:inline-block;margin-top:24px;
+  padding:14px 36px;
+  background:#c9a44b;color:#111016;
+  text-decoration:none;border-radius:6px;
+  font-weight:600;transition:background 0.3s
+}
+a:hover { background:#e0c878 }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">&#10003;</div>
+  <h1>Pago confirmado</h1>
+  <p>Gracias por tu compra en La Guarida del Tiempo.</p>
+  <p>Hemos recibido tu pedido y te hemos enviado un email de confirmacion.</p>
+  <div class="ref">Referencia: {{ order_id }}</div>
+  <a href="/">Volver a la tienda</a>
+</div>
+</body>
+</html>

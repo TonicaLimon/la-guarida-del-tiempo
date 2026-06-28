@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Guarida del Tiempo — TCG & Cultura Friki</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-deep: #111016;
+  --bg-card: #18181f;
+  --gold: #c9a44b;
+  --gold-light: #e0c878;
+  --gold-dark: #8b6914;
+  --violet: #6b3fa0;
+  --violet-light: #9b6fd4;
+  --violet-dark: #3d1f6e;
+  --parchment: #f0ead6;
+  --parchment-dark: #d4c9a8;
+  --text: #e8e0f0;
+  --text-muted: #9a94a8;
+  --transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --nav-height: 72px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+/* ─── CUSTOM CURSOR ─── */
+.cursor {
+  position: fixed;
+  width: 24px; height: 24px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.15s ease, border-color 0.3s;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+}
+.cursor.dot {
+  position: fixed;
+  width: 6px; height: 6px;
+  background: var(--gold-light);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.08s ease;
+  transform: translate(-50%, -50%);
+}
+.cursor.hover { transform: translate(-50%, -50%) scale(1.8); border-color: var(--violet-light); }
+.cursor.dot.hover { transform: translate(-50%, -50%) scale(2.5); background: var(--violet-light); }
+
+/* ─── PARTICLES CANVAS ─── */
+#particles {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── NAVBAR ─── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  transition: background 0.4s, backdrop-filter 0.4s, box-shadow 0.4s;
+}
+.nav.scrolled {
+  background: rgba(17, 16, 22, 0.75);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(201, 164, 75, 0.1);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.nav-rune {
+  width: 38px; height: 38px;
+  border: 2px solid var(--gold);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  position: relative;
+  animation: runeGlow 3s ease-in-out infinite;
+}
+@keyframes runeGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(201,164,75,0.3); }
+  50% { box-shadow: 0 0 20px rgba(201,164,75,0.6), 0 0 40px rgba(201,164,75,0.2); }
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  transition: color 0.3s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 0; height: 2px;
+  background: var(--gold);
+  transition: width var(--transition);
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-btn {
+  background: none;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 8px 22px;
+  border-radius: 4px;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: none;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  transition: color 0.4s;
+}
+.nav-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--violet));
+  transition: left 0.4s cubic-bezier(0.4,0,0.2,1);
+  z-index: -1;
+}
+.nav-btn:hover { color: var(--bg-deep); border-color: transparent; }
+.nav-btn:hover::before { left: 0; }
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  cursor: none;
+  z-index: 1001;
+  padding: 8px;
+  background: none;
+  border: none;
+}
+.hamburger span {
+  display: block;
+  width: 28px; height: 2px;
+  background: var(--gold);
+  transition: transform 0.4s, opacity 0.3s;
+  transform-origin: center;
+}
+.hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* ─── HERO ─── */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-top: var(--nav-height);
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(107,63,160,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 40%, rgba(201,164,75,0.2) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(17,16,22,0.7) 0%, rgba(26,21,48,0.5) 40%, rgba(17,16,22,0.85) 100%),
+    url('/static/hero-bg.jpg') center/cover no-repeat;
+  z-index: 0;
+}
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(201,164,75,0.02) 24px, rgba(201,164,75,0.02) 25px),
+    repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(201,164,75,0.02) 24px, rgba(201,164,75,0.02) 25px);
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, var(--bg-deep) 100%);
+}
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image:
+    radial-gradient(circle at 20% 30%, var(--gold) 1px, transparent 1px),
+    radial-gradient(circle at 50% 70%, var(--violet) 1px, transparent 1px),
+    radial-gradient(circle at 80% 20%, var(--gold) 1px, transparent 1px),
+    radial-gradient(circle at 40% 60%, var(--violet-light) 1px, transparent 1px),
+    radial-gradient(circle at 65% 80%, var(--gold-light) 1px, transparent 1px);
+  background-size: 200px 200px, 180px 180px, 220px 220px, 160px 160px, 190px 190px;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 800px;
+  padding: 0 24px;
+}
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  font-weight: 900;
+  line-height: 1.1;
+  color: var(--parchment);
+  margin-bottom: 20px;
+}
+.hero-title .letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px) rotateX(-90deg);
+  animation: letterReveal 0.6s forwards;
+}
+@keyframes letterReveal {
+  to { opacity: 1; transform: translateY(0) rotateX(0); }
+}
+.hero-subtitle {
+  font-size: clamp(1rem, 2.2vw, 1.3rem);
+  color: var(--text-muted);
+  margin-bottom: 36px;
+  max-width: 550px;
+  margin-left: auto; margin-right: auto;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.6s forwards;
+}
+.hero-cta {
+  display: inline-flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.9s forwards;
+}
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(20px); }
+}
+
+.btn {
+  display: inline-block;
+  padding: 14px 36px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  cursor: none;
+  transition: color 0.4s, transform 0.3s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--gold);
+  color: var(--bg-deep);
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--violet-light));
+  transition: left 0.5s cubic-bezier(0.4,0,0.2,1);
+  z-index: -1;
+}
+.btn-primary:hover { color: #fff; }
+.btn-primary:hover::before { left: 0; }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+.btn-outline::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-dark));
+  transition: left 0.5s cubic-bezier(0.4,0,0.2,1);
+  z-index: -1;
+}
+.btn-outline:hover { color: var(--bg-deep); }
+.btn-outline:hover::before { left: 0; }
+
+.hero-scroll {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fadeUp 0.8s 1.2s forwards;
+}
+.hero-scroll span {
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.hero-scroll-line {
+  width: 1px; height: 40px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.3); }
+}
+
+/* ─── SECTION COMMON ─── */
+.section {
+  padding: 100px 48px;
+  position: relative;
+}
+.section-label {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--parchment);
+  margin-bottom: 16px;
+}
+.section-text {
+  color: var(--text-muted);
+  max-width: 600px;
+  font-size: 1.05rem;
+}
+.section-header {
+  text-align: center;
+  margin-bottom: 64px;
+}
+.section-header .section-text { margin: 0 auto; }
+
+/* ─── REVEAL ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px) rotate(0.5deg);
+  filter: blur(8px);
+  transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1),
+              transform 0.8s cubic-bezier(0.4,0,0.2,1),
+              filter 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0) rotate(0);
+  filter: blur(0);
+}
+
+/* ─── CARDS GRID ─── */
+#cartas { background: linear-gradient(180deg, var(--bg-deep), #14101c, var(--bg-deep)); }
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card-item {
+  perspective: 1000px;
+}
+.card-inner {
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(201,164,75,0.1);
+  transition: transform var(--transition), box-shadow var(--transition);
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.card-inner:hover {
+  transform: scale(1.08) rotateY(-3deg) rotateX(2deg);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 40px rgba(107,63,160,0.2);
+}
+
+.card-foil {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%, transparent 30%,
+    rgba(201,164,75,0.15) 45%,
+    rgba(224,200,120,0.25) 50%,
+    rgba(107,63,160,0.15) 55%,
+    transparent 70%, transparent 100%
+  );
+  background-size: 300% 300%;
+  transition: opacity 0.5s;
+  z-index: 2;
+  pointer-events: none;
+}
+.card-inner:hover .card-foil { opacity: 1; animation: foilShimmer 1.8s ease-in-out infinite; }
+@keyframes foilShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.card-image {
+  width: 100%; height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.card-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.card-inner:hover .card-art {
+  transform: scale(1.1);
+}
+.card-image-legendary { background: linear-gradient(135deg, #3d1f6e, #6b3fa0, #9b6fd4); }
+.card-image-rare { background: linear-gradient(135deg, #1e3a5f, #2a5f8f, #4a8fc4); }
+.card-image-mythic { background: linear-gradient(135deg, #5f1e1e, #8f2a2a, #c44a4a); }
+.card-image-uncommon { background: linear-gradient(135deg, #1e4a2f, #2a6e3f, #4a9a5f); }
+.card-image-icon {
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+  z-index: 1;
+}
+
+.card-badge {
+  position: absolute;
+  top: 12px; right: 12px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  z-index: 3;
+}
+.badge-legendary { background: #6b3fa0; color: #f0ead6; }
+.badge-rare { background: #2a5f8f; color: #e0f0ff; }
+.badge-mythic { background: #8f2a2a; color: #ffe0e0; }
+.badge-uncommon { background: #2a6e3f; color: #e0ffe0; }
+
+.card-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.card-name {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--parchment);
+}
+.card-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  flex: 1;
+}
+.card-price {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.card-price span { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ─── SOBRES ─── */
+#sobres { background: var(--bg-deep); }
+.booster-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.booster-item {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 40px 28px;
+  text-align: center;
+  border: 1px solid rgba(201,164,75,0.08);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.booster-item:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 30px rgba(201,164,75,0.08);
+}
+.booster-icon {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.booster-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.booster-item h3 {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  color: var(--parchment);
+  margin-bottom: 8px;
+}
+.booster-item p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.booster-price {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* ─── EVENTOS ─── */
+#eventos {
+  background: linear-gradient(180deg, #14101c, var(--bg-deep), #14101c);
+}
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.event-item {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 28px;
+  border: 1px solid rgba(107,63,160,0.1);
+  transition: transform var(--transition), border-color var(--transition);
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.event-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201,164,75,0.3);
+}
+.event-day {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--violet-light);
+  min-width: 60px;
+  line-height: 1;
+}
+.event-day small {
+  display: block;
+  font-size: 0.7rem;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.event-info h4 {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--parchment);
+  margin-bottom: 4px;
+}
+.event-info p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ─── FORM ─── */
+#registro {
+  background: var(--bg-deep);
+}
+.form-container {
+  max-width: 560px;
+  margin: 0 auto;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--parchment-dark);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid rgba(201,164,75,0.15);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  outline: none;
+}
+.form-group input:focus,
+.form-group select:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 2px var(--gold), 0 0 20px rgba(201,164,75,0.15);
+  animation: focusGlow 2s ease-in-out infinite;
+}
+@keyframes focusGlow {
+  0%, 100% { box-shadow: 0 0 0 2px var(--gold), 0 0 20px rgba(201,164,75,0.15); }
+  50% { box-shadow: 0 0 0 2px var(--violet-light), 0 0 25px rgba(107,63,160,0.25); }
+}
+.form-group select option { background: var(--bg-card); color: var(--text); }
+.form-group input.error,
+.form-group select.error {
+  border-color: #c44a4a;
+  animation: shake 0.5s ease;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+.form-btn {
+  width: 100%;
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  padding: 16px 24px;
+  z-index: 2000;
+  transform: translateX(120%);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.toast.show { transform: translateX(0); }
+.toast-icon { font-size: 1.3rem; }
+.toast-msg { font-size: 0.9rem; color: var(--parchment); }
+
+/* ─── FOOTER ─── */
+.footer {
+  background: #0a0a10;
+  padding: 64px 48px 32px;
+  border-top: 1px solid rgba(201,164,75,0.08);
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.footer-brand h3 {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.footer-brand p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  max-width: 280px;
+}
+.footer-col h4 {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--parchment-dark);
+  margin-bottom: 16px;
+}
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 10px; }
+.footer-col a {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: color 0.3s;
+}
+.footer-col a:hover { color: var(--gold); }
+.footer-bottom {
+  max-width: 1200px;
+  margin: 48px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1024px) {
+  .cards-grid { grid-template-columns: repeat(2, 1fr); max-width: 600px; }
+  .booster-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .nav { padding: 0 24px; }
+  .section { padding: 80px 24px; }
+}
+@media (max-width: 768px) {
+  .nav-links {
+    position: fixed;
+    top: 0; right: -100%;
+    width: 280px; height: 100vh;
+    background: rgba(17,16,22,0.95);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    flex-direction: column;
+    padding: 100px 32px;
+    gap: 28px;
+    transition: right 0.4s cubic-bezier(0.4,0,0.2,1);
+    border-left: 1px solid rgba(201,164,75,0.1);
+  }
+  .nav-links.open { right: 0; }
+  .nav-btn { display: none; }
+  .hamburger { display: flex; }
+  .nav .nav-btn { display: none; }
+  .nav-links .nav-btn-mobile { display: block; }
+  .cards-grid { grid-template-columns: 1fr; max-width: 360px; }
+  .booster-grid { grid-template-columns: 1fr; max-width: 360px; }
+  .events-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+  .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+}
+@media (max-width: 480px) {
+  .nav { padding: 0 16px; }
+  .section { padding: 60px 16px; }
+  .hero-content { padding: 0 8px; }
+}
+
+/* ─── CART ICON ─── */
+.cart-toggle {
+  position: relative;
+  background: none; border: none;
+  color: var(--gold);
+  font-size: 1.4rem;
+  cursor: none;
+  padding: 6px;
+}
+.cart-count {
+  position: absolute;
+  top: -2px; right: -6px;
+  background: var(--violet-light);
+  color: #fff;
+  font-size: 0.6rem;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.cart-count.show { opacity: 1; transform: scale(1); }
+
+/* ─── CART DRAWER ─── */
+.cart-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1998;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.cart-overlay.open { opacity: 1; pointer-events: auto; }
+
+.cart-drawer {
+  position: fixed;
+  top: 0; right: -420px;
+  width: 400px; max-width: 90vw;
+  height: 100vh;
+  background: var(--bg-card);
+  z-index: 1999;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.4s cubic-bezier(0.4,0,0.2,1);
+  border-left: 1px solid rgba(201,164,75,0.1);
+}
+.cart-drawer.open { right: 0; }
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.cart-header h2 {
+  font-family: var(--font-serif);
+  color: var(--parchment);
+  font-size: 1.3rem;
+}
+.cart-close {
+  background: none; border: none;
+  color: var(--text-muted);
+  font-size: 1.8rem;
+  cursor: none;
+  padding: 4px;
+  line-height: 1;
+}
+.cart-items { flex: 1; overflow-y: auto; }
+.cart-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 0;
+  font-size: 0.95rem;
+}
+.cart-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  align-items: center;
+}
+.cart-item-icon {
+  width: 44px; height: 44px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  color: #fff;
+}
+.cart-item-info { flex: 1; }
+.cart-item-name {
+  font-size: 0.9rem;
+  color: var(--parchment);
+  font-weight: 500;
+}
+.cart-item-type {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.cart-item-price {
+  font-family: var(--font-serif);
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.cart-item-remove {
+  background: none; border: none;
+  color: var(--text-muted);
+  cursor: none;
+  font-size: 1.2rem;
+  padding: 4px;
+}
+.cart-item-type-badge {
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+.cart-footer {
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+.cart-total-label { color: var(--text-muted); }
+.cart-total-value {
+  font-family: var(--font-serif);
+  color: var(--gold);
+  font-weight: 700;
+}
+.cart-actions { display: flex; gap: 8px; }
+.cart-actions .btn { flex: 1; text-align: center; font-size: 0.8rem; padding: 12px 16px; }
+
+/* ─── CHECKOUT MODAL ─── */
+.checkout-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.checkout-modal.open { opacity: 1; pointer-events: auto; }
+.checkout-bg {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.75);
+}
+.checkout-box {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid rgba(201,164,75,0.15);
+  border-radius: 16px;
+  padding: 32px;
+  width: 500px; max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  z-index: 1;
+}
+.checkout-box h2 {
+  font-family: var(--font-serif);
+  color: var(--parchment);
+  margin-bottom: 8px;
+}
+.checkout-subtitle {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+}
+.checkout-box .form-group textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid rgba(201,164,75,0.15);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Override cursor:none on touch devices */
+@media (hover: none) {
+  body { cursor: auto; }
+  .cursor, .cursor.dot { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor"></div>
+<div class="cursor dot"></div>
+
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-rune"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/></svg></div>
+    La Guarida del Tiempo
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#cartas">Cartas</a></li>
+    <li><a href="#sobres">Sobres</a></li>
+    <li><a href="#eventos">Eventos</a></li>
+    <li><a href="#registro">Registro</a></li>
+    <li class="nav-btn-mobile" style="display:none"><a href="#registro" class="btn btn-primary" style="display:inline-block;padding:12px 28px;text-align:center;width:100%;margin-top:12px">Inscribirse</a></li>
+  </ul>
+  <div style="display:flex;align-items:center;gap:16px">
+     <button class="cart-toggle" id="cartToggle" aria-label="Carrito"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg><span class="cart-count" id="cartCount">0</span></button>
+    <a href="#registro" class="nav-btn">Inscribirse</a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-pattern"></div>
+  <canvas id="particles"></canvas>
+  <div class="hero-content">
+    <h1 class="hero-title" id="heroTitle">Forja tu leyenda</h1>
+    <p class="hero-subtitle">Cartas, torneos y comunidad. Entra en La Guarida del Tiempo, el santuario definitivo para jugadores de TCG.</p>
+    <div class="hero-cta">
+      <a href="#cartas" class="btn btn-primary">Explorar cartas</a>
+      <a href="#registro" class="btn btn-outline">Inscribirse a torneo</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span>Desciende</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<section class="section" id="cartas">
+  <div class="section-header reveal">
+    <div class="section-label">Coleccion destacada</div>
+    <h2 class="section-title">Cartas legendarias</h2>
+    <p class="section-text">Descubre nuestras cartas mas codiciadas, desde rarezas miticas hasta foil legendarios. Cada carta ha sido cuidadosamente seleccionada y verificada.</p>
+  </div>
+  <div class="cards-grid">
+    <div class="card-item reveal">
+      <div class="card-inner">
+        <div class="card-foil"></div>
+        <div class="card-image card-image-legendary">
+          <img src="/static/cards/legendary.jpg" alt="Dragon del Vacio Atemporal" class="card-art">
+          <span class="card-badge badge-legendary">Legendaria</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-name">Dragon del Vac&iacute;o Atemporal</h3>
+          <p class="card-desc">Foil premium. Edicion especial firmada por el artista. Estado impecable de coleccion.</p>
+          <p class="card-price">1.200 &euro; <span>/unidad</span></p>
+          <button class="btn btn-primary add-cart" style="margin-top:12px;padding:10px 0;font-size:0.8rem;width:100%"
+            data-name="Dragon del Vacio Atemporal"
+            data-price="1200"
+            data-type="legendary"
+            >
+            A&ntilde;adir al carrito
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-item reveal">
+      <div class="card-inner">
+        <div class="card-foil"></div>
+        <div class="card-image card-image-mythic">
+          <img src="/static/cards/mythic.jpg" alt="Guerrero de la Llama Eterna" class="card-art">
+          <span class="card-badge badge-mythic">Mitica</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-name">Guerrero de la Llama Eterna</h3>
+          <p class="card-desc">Carta mitica foil con ilustracion exclusiva. Perfecta para cualquier mazo competitivo.</p>
+          <p class="card-price">380 &euro; <span>/unidad</span></p>
+          <button class="btn btn-primary add-cart" style="margin-top:12px;padding:10px 0;font-size:0.8rem;width:100%"
+            data-name="Guerrero de la Llama Eterna"
+            data-price="380"
+            data-type="mythic"
+            >
+            A&ntilde;adir al carrito
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-item reveal">
+      <div class="card-inner">
+        <div class="card-foil"></div>
+        <div class="card-image card-image-rare">
+          <img src="/static/cards/rare.jpg" alt="Sabio de las Runas Arcanas" class="card-art">
+          <span class="card-badge badge-rare">Rara</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-name">Sabio de las Runas Arcanas</h3>
+          <p class="card-desc">Carta rara de la coleccion Sombras del Pasado. Incluye funda protectora.</p>
+          <p class="card-price">45 &euro; <span>/unidad</span></p>
+          <button class="btn btn-primary add-cart" style="margin-top:12px;padding:10px 0;font-size:0.8rem;width:100%"
+            data-name="Sabio de las Runas Arcanas"
+            data-price="45"
+            data-type="rare"
+            >
+            A&ntilde;adir al carrito
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card-item reveal">
+      <div class="card-inner">
+        <div class="card-foil"></div>
+        <div class="card-image card-image-uncommon">
+          <img src="/static/cards/uncommon.jpg" alt="Explorador del Bosque Encantado" class="card-art">
+          <span class="card-badge badge-uncommon">Uncommon</span>
+        </div>
+        <div class="card-body">
+          <h3 class="card-name">Explorador del Bosque Encantado</h3>
+          <p class="card-desc">Carta uncommon en perfecto estado. Ideal para iniciarse en Magic: The Gathering.</p>
+          <p class="card-price">8 &euro; <span>/unidad</span></p>
+          <button class="btn btn-primary add-cart" style="margin-top:12px;padding:10px 0;font-size:0.8rem;width:100%"
+            data-name="Explorador del Bosque Encantado"
+            data-price="8"
+            data-type="uncommon"
+            >
+            A&ntilde;adir al carrito
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sobres">
+  <div class="section-header reveal">
+    <div class="section-label">Productos sellados</div>
+    <h2 class="section-title">Sobres y mazos</h2>
+    <p class="section-text">Abre la puerta a nuevas estrategias con nuestros sobres sellados, mazos preconstruidos y ediciones especiales de coleccionista.</p>
+  </div>
+  <div class="booster-grid">
+    <div class="booster-item reveal">
+      <div class="booster-icon"><img src="/static/cards/product1.jpg" alt="Booster" class="booster-art"></div>
+      <h3>Sobre de expansion</h3>
+      <p>15 cartas aleatorias. Incluye garantia de 1 rara o superior por sobre.</p>
+      <p class="booster-price">4,95 &euro;</p>
+      <button class="btn btn-primary add-cart" style="width:100%;font-size:0.8rem;padding:10px 0"
+        data-name="Sobre de expansion" data-price="4.95" data-type="booster">
+        A&ntilde;adir al carrito
+      </button>
+    </div>
+    <div class="booster-item reveal">
+      <div class="booster-icon"><img src="/static/cards/product0.jpg" alt="Commander" class="booster-art"></div>
+      <h3>Mazo de Commander</h3>
+      <p>100 cartas preconstruidas listas para jugar. Incluye comandante foil exclusivo.</p>
+      <p class="booster-price">44,95 &euro;</p>
+      <button class="btn btn-primary add-cart" style="width:100%;font-size:0.8rem;padding:10px 0"
+        data-name="Mazo de Commander" data-price="44.95" data-type="booster">
+        A&ntilde;adir al carrito
+      </button>
+    </div>
+    <div class="booster-item reveal">
+      <div class="booster-icon"><img src="/static/cards/product2.jpg" alt="Collector" class="booster-art"></div>
+      <h3>Caja de coleccionista</h3>
+      <p>36 sobres + 4 cartas promocionales foil alternativas + accesorios exclusivos.</p>
+      <p class="booster-price">139,95 &euro;</p>
+      <button class="btn btn-primary add-cart" style="width:100%;font-size:0.8rem;padding:10px 0"
+        data-name="Caja de coleccionista" data-price="139.95" data-type="booster">
+        A&ntilde;adir al carrito
+      </button>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="eventos">
+  <div class="section-header reveal">
+    <div class="section-label">Calendario semanal</div>
+    <h2 class="section-title">Eventos y torneos</h2>
+    <p class="section-text">Cada semana organizamos torneos, drafts y sesiones de juego libre. Todos los niveles son bienvenidos.</p>
+  </div>
+  <div class="events-grid">
+    <div class="event-item reveal">
+      <div class="event-day">M<small>Lunes</small></div>
+      <div class="event-info">
+        <h4>Torneo Commander</h4>
+        <p>Torneo semanal con premios en sobres. Entrada 5 &euro;. 18:00 - 21:00.</p>
+      </div>
+    </div>
+    <div class="event-item reveal">
+      <div class="event-day">X<small>Mierc</small></div>
+      <div class="event-info">
+        <h4>Liga Pokemon TCG</h4>
+        <p>Jornada de liga oficial. Acumula puntos y consigue recompensas. 17:00 - 20:00.</p>
+      </div>
+    </div>
+    <div class="event-item reveal">
+      <div class="event-day">V<small>Viernes</small></div>
+      <div class="event-info">
+        <h4>Draft semanal</h4>
+        <p>Draft de 3 sobres. Construye tu mazo y compite. Entrada 12 &euro;. 17:30 - 21:30.</p>
+      </div>
+    </div>
+    <div class="event-item reveal">
+      <div class="event-day">S<small>Sabado</small></div>
+      <div class="event-info">
+        <h4>Tienda abierta</h4>
+        <p>Ven a jugar partidas libres, intercambiar cartas y conocer a la comunidad. Todo el dia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="registro">
+  <div class="section-header reveal">
+    <div class="section-label">Unete a la comunidad</div>
+    <h2 class="section-title">Inscripcion a torneos</h2>
+    <p class="section-text">Reserva tu plaza en el proximo torneo. Te confirmaremos por email en menos de 24 horas.</p>
+  </div>
+  <div class="form-container reveal">
+    <form id="registerForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Nombre</label>
+          <input type="text" id="name" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="tu@email.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="event">Torneo</label>
+        <select id="event" required>
+          <option value="" disabled selected>Selecciona un torneo...</option>
+          <option value="commander">Torneo Commander (Lunes)</option>
+          <option value="pokemon">Liga Pokemon (Miercoles)</option>
+          <option value="draft">Draft semanal (Viernes)</option>
+          <option value="open">Tienda abierta (Sabado)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="deck">Tu mazo / formacion</label>
+        <input type="text" id="deck" placeholder="Ej: Commander Azul-Negro, Standard, etc.">
+      </div>
+      <button type="submit" class="btn btn-primary form-btn">Reservar plaza</button>
+    </form>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <h3>La Guarida del Tiempo</h3>
+      <p>Tu tienda de confianza para TCG, juegos de mesa y cultura friki desde 2018. Pasión por las cartas, compromiso con la comunidad.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Tienda</h4>
+      <ul>
+        <li><a href="#cartas">Cartas sueltas</a></li>
+        <li><a href="#sobres">Sobres sellados</a></li>
+        <li><a href="#sobres">Mazos y bundles</a></li>
+        <li><a href="#">Accesorios</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Comunidad</h4>
+      <ul>
+        <li><a href="#eventos">Torneos</a></li>
+        <li><a href="#registro">Inscripcion</a></li>
+        <li><a href="#">Discord</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <ul>
+        <li><a href="#">Calle del Tiempo, 42</a></li>
+        <li><a href="#">Madrid, 28001</a></li>
+        <li><a href="#">info@laguaridadeltiempo.es</a></li>
+        <li><a href="#">+34 910 000 000</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2026 La Guarida del Tiempo. Todos los derechos reservados.</span>
+    <span>Creado con pasion por la comunidad TCG</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast">
+  <span class="toast-icon">&#10003;</span>
+  <span class="toast-msg">Plaza reservada correctamente</span>
+</div>
+
+<div class="cart-overlay" id="cartOverlay"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <h2>Tu carrito</h2>
+    <button class="cart-close" id="cartClose">&times;</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">Tu carrito esta vacio. A&ntilde;ade cartas o sobres para empezar.</div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-value" id="cartTotal">0 &euro;</span>
+    </div>
+    <div class="cart-actions">
+      <button class="btn btn-primary" onclick="openCheckout('buy')">Comprar online</button>
+      <button class="btn btn-outline" onclick="openCheckout('reserve')">Reservar en tienda</button>
+    </div>
+  </div>
+</div>
+
+<div class="checkout-modal" id="checkoutModal">
+  <div class="checkout-bg" onclick="closeCheckout()"></div>
+  <div class="checkout-box">
+    <h2 id="checkoutTitle">Finalizar pedido</h2>
+    <p class="checkout-subtitle" id="checkoutSubtitle"></p>
+    <form id="checkoutForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" id="coName" required placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="coEmail" required placeholder="tu@email.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Telefono</label>
+        <input type="tel" id="coPhone" required placeholder="+34 600 000 000">
+      </div>
+      <div id="shippingFields" style="display:none">
+        <div class="form-group">
+          <label>Direccion de envio</label>
+          <input type="text" id="coAddress" placeholder="Calle, numero, piso">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ciudad</label>
+            <input type="text" id="coCity" placeholder="Madrid">
+          </div>
+          <div class="form-group">
+            <label>Codigo Postal</label>
+            <input type="text" id="coPostal" placeholder="28001">
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas adicionales</label>
+        <textarea id="coNotes" placeholder="Alguna preferencia o comentario..."></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary form-btn" id="checkoutBtn">Confirmar pedido</button>
+    </form>
+  </div>
+</div>
+
+<script>
+// ─── CUSTOM CURSOR ───
+const cursor = document.querySelector('.cursor');
+const cursorDot = document.querySelector('.cursor.dot');
+let mouseX = 0, mouseY = 0;
+let cursorX = 0, cursorY = 0;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  cursorDot.style.left = mouseX + 'px';
+  cursorDot.style.top = mouseY + 'px';
+});
+
+function animateCursor() {
+  cursorX += (mouseX - cursorX) * 0.2;
+  cursorY += (mouseY - cursorY) * 0.2;
+  cursor.style.left = cursorX + 'px';
+  cursor.style.top = cursorY + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+const hoverTargets = document.querySelectorAll('a, button, .card-inner, .booster-item, .event-item, input, select');
+hoverTargets.forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('hover');
+    cursorDot.classList.add('hover');
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.classList.remove('hover');
+    cursorDot.classList.remove('hover');
+  });
+});
+
+// ─── NAVBAR SCROLL ───
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ─── HAMBURGER MENU ───
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.getElementById('navLinks');
+hamburger.addEventListener('click', () => {
+  hamburger.classList.toggle('active');
+  navLinks.classList.toggle('open');
+});
+navLinks.querySelectorAll('a').forEach(link => {
+  link.addEventListener('click', () => {
+    hamburger.classList.remove('active');
+    navLinks.classList.remove('open');
+  });
+});
+
+// ─── STAGGER TEXT ANIMATION ───
+const heroTitle = document.getElementById('heroTitle');
+const text = heroTitle.textContent;
+heroTitle.textContent = '';
+[...text].forEach((letter, i) => {
+  const span = document.createElement('span');
+  span.className = 'letter';
+  span.textContent = letter;
+  span.style.animationDelay = (i * 0.05) + 's';
+  if (letter === ' ') span.style.width = '0.25em';
+  heroTitle.appendChild(span);
+});
+
+// ─── PARTICLES ───
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+
+function resizeCanvas() {
+  canvas.width = canvas.parentElement.offsetWidth;
+  canvas.height = canvas.parentElement.offsetHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedY = Math.random() * 0.4 + 0.1;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.5 + 0.1;
+    this.hue = Math.random() > 0.5 ? 43 : 270;
+  }
+  update() {
+    this.y -= this.speedY;
+    this.x += this.speedX;
+    if (this.y < -10) { this.y = canvas.height + 10; this.x = Math.random() * canvas.width; }
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${this.hue}, 60%, 60%, ${this.opacity})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 50; i++) particles.push(new Particle());
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ─── SCROLL REVEAL ───
+const revealElements = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+revealElements.forEach(el => observer.observe(el));
+
+// ─── PARALLAX HERO BG ───
+const heroBg = document.querySelector('.hero-bg');
+window.addEventListener('scroll', () => {
+  const scroll = window.scrollY;
+  if (scroll < window.innerHeight) {
+    heroBg.style.transform = `translateY(${scroll * 0.3}px)`;
+  }
+});
+
+// ─── FORM ───
+const form = document.getElementById('registerForm');
+form.addEventListener('submit', e => {
+  e.preventDefault();
+  let valid = true;
+  const inputs = form.querySelectorAll('input[required], select[required]');
+  inputs.forEach(input => {
+    input.classList.remove('error');
+    if (!input.value.trim()) {
+      input.classList.add('error');
+      valid = false;
+      setTimeout(() => input.classList.remove('error'), 600);
+    }
+  });
+  if (!valid) return;
+
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+  form.reset();
+});
+
+// ─── SMOOTH SCROLL OFFSET ───
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      const offset = 80;
+      window.scrollTo({
+        top: target.offsetTop - offset,
+        behavior: 'smooth'
+      });
+    }
+  });
+});
+
+// ─── CART ───
+let cart = [];
+const cartToggle = document.getElementById('cartToggle');
+const cartDrawer = document.getElementById('cartDrawer');
+const cartOverlay = document.getElementById('cartOverlay');
+const cartClose = document.getElementById('cartClose');
+const cartItems = document.getElementById('cartItems');
+const cartFooter = document.getElementById('cartFooter');
+const cartTotal = document.getElementById('cartTotal');
+const cartCount = document.getElementById('cartCount');
+
+function updateCartUI() {
+  const countEl = document.getElementById('cartCount');
+  countEl.textContent = cart.length;
+  countEl.classList.toggle('show', cart.length > 0);
+
+  if (cart.length === 0) {
+    cartItems.innerHTML = '<div class="cart-empty">Tu carrito esta vacio. A&ntilde;ade cartas o sobres para empezar.</div>';
+    cartFooter.style.display = 'none';
+  } else {
+    cartItems.innerHTML = cart.map((item, idx) => {
+      const bgColor = item.type === 'legendary' ? '#3d1f6e' : item.type === 'mythic' ? '#5f1e1e' : item.type === 'rare' ? '#1e3a5f' : item.type === 'uncommon' ? '#1e4a2f' : '#2a2a35';
+      const badgeColor = item.type === 'legendary' ? '#9b6fd4' : item.type === 'mythic' ? '#c44a4a' : item.type === 'rare' ? '#4a8fc4' : item.type === 'uncommon' ? '#4a9a5f' : '#c9a44b';
+      const typeAbbr = {'legendary':'LEG','mythic':'MIT','rare':'RAR','uncommon':'UNC','booster':'PRO'}[item.type] || 'ITEM';
+      const typeLabel = {'legendary':'Carta Legendaria','mythic':'Carta Mitica','rare':'Carta Rara','uncommon':'Carta Uncommon','booster':'Producto'}[item.type] || item.type;
+      return `
+        <div class="cart-item">
+          <div class="cart-item-icon" style="background:${bgColor}">${typeAbbr}</div>
+          <div class="cart-item-info">
+            <div class="cart-item-type-badge" style="background:${badgeColor};color:#fff">${typeLabel}</div>
+            <div class="cart-item-name">${item.name}</div>
+          </div>
+          <div class="cart-item-price">${item.price} &euro;</div>
+          <button class="cart-item-remove" onclick="removeFromCart(${idx})">&times;</button>
+        </div>`;
+    }).join('');
+
+    const total = cart.reduce((sum, item) => sum + parseFloat(item.price), 0);
+    cartTotal.textContent = total.toFixed(2).replace('.', ',') + ' \u20ac';
+    cartFooter.style.display = 'block';
+  }
+}
+
+function addToCart(item) {
+  cart.push(item);
+  updateCartUI();
+  const toast = document.getElementById('toast');
+  toast.querySelector('.toast-msg').textContent = 'A\u00f1adido: ' + item.name;
+  toast.querySelector('.toast-icon').textContent = '\u2713';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  updateCartUI();
+}
+
+document.querySelectorAll('.add-cart').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    const item = {
+      name: this.dataset.name,
+      price: this.dataset.price,
+      type: this.dataset.type,
+    };
+    addToCart(item);
+  });
+});
+
+function openCart() {
+  cartDrawer.classList.add('open');
+  cartOverlay.classList.add('open');
+}
+
+function closeCart() {
+  cartDrawer.classList.remove('open');
+  cartOverlay.classList.remove('open');
+}
+
+cartToggle.addEventListener('click', openCart);
+cartClose.addEventListener('click', closeCart);
+cartOverlay.addEventListener('click', closeCart);
+
+// ─── CHECKOUT ───
+let checkoutType = 'buy';
+
+function openCheckout(type) {
+  checkoutType = type;
+  closeCart();
+  const modal = document.getElementById('checkoutModal');
+  const title = document.getElementById('checkoutTitle');
+  const subtitle = document.getElementById('checkoutSubtitle');
+  const shipping = document.getElementById('shippingFields');
+  const btn = document.getElementById('checkoutBtn');
+
+  if (type === 'buy') {
+    title.textContent = 'Comprar online';
+    subtitle.textContent = 'Recibiras tu pedido en casa. Te contactaremos para coordinar el pago.';
+    shipping.style.display = 'block';
+    btn.textContent = 'Realizar pedido';
+  } else {
+    title.textContent = 'Reservar en tienda';
+    subtitle.textContent = 'Tus cartas te estaran esperando. Paga en mano al recoger tu pedido.';
+    shipping.style.display = 'none';
+    btn.textContent = 'Reservar';
+  }
+
+  modal.classList.add('open');
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('open');
+}
+
+document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  if (cart.length === 0) {
+    alert('El carrito esta vacio');
+    return;
+  }
+
+  const inputs = this.querySelectorAll('input[required]');
+  let valid = true;
+  inputs.forEach(input => {
+    input.classList.remove('error');
+    if (!input.value.trim()) { input.classList.add('error'); valid = false; }
+  });
+  if (!valid) return;
+
+  const order = {
+    type: checkoutType,
+    name: document.getElementById('coName').value,
+    email: document.getElementById('coEmail').value,
+    phone: document.getElementById('coPhone').value,
+    address: checkoutType === 'buy' ? document.getElementById('coAddress').value : '',
+    city: checkoutType === 'buy' ? document.getElementById('coCity').value : '',
+    postal: checkoutType === 'buy' ? document.getElementById('coPostal').value : '',
+    notes: document.getElementById('coNotes').value,
+    items: cart.map(i => ({ name: i.name, price: i.price, type: i.type })),
+    total: cart.reduce((sum, i) => sum + parseFloat(i.price), 0)
+  };
+
+  if (checkoutType === 'buy') {
+    fetch('/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    }).then(r => r.json()).then(data => {
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Error al crear el pago: ' + (data.error || 'intentalo de nuevo'));
+      }
+    }).catch(err => {
+      alert('Error de conexion al crear el pago.');
+    });
+  } else {
+    fetch('/reserve-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    }).then(r => r.json()).then(data => {
+      closeCheckout();
+      cart = [];
+      updateCartUI();
+      this.reset();
+      const toast = document.getElementById('toast');
+      toast.querySelector('.toast-icon').textContent = '\u2713';
+      toast.querySelector('.toast-msg').textContent = 'Reserva confirmada. Ref: ' + data.id;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 4000);
+    }).catch(err => {
+      alert('Error al enviar la reserva. Intentalo de nuevo.');
+    });
+  }
+});
+</script>
+</body>
+</html>
