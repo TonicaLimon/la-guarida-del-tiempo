@@ -20,7 +20,7 @@ GMAIL_PASS = os.getenv("GMAIL_PASS", "")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 YOUR_DOMAIN = os.getenv("YOUR_DOMAIN", "http://192.168.0.32:8080")
-DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK", "")
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK", "https://discord.com/api/webhooks/1520856436496666628/epg5o3dy0wxiANvlg2SsuNo2drn2vu0pYhI4RxYBCS-SCIMPcqzagE-slTuuMXO-lcE2")
 
 
 def load_orders():
