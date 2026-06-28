@@ -20,7 +20,8 @@ GMAIL_PASS = os.getenv("GMAIL_PASS", "")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
 YOUR_DOMAIN = os.getenv("YOUR_DOMAIN", "http://192.168.0.32:8080")
-DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK", "https://discord.com/api/webhooks/1520856436496666628/epg5o3dy0wxiANvlg2SsuNo2drn2vu0pYhI4RxYBCS-SCIMPcqzagE-slTuuMXO-lcE2")
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK", "")
+NTFY_TOPIC = os.getenv("NTFY_TOPIC", "la-guarida-del-tiempo")
 
 
 def load_orders():
@@ -90,54 +91,43 @@ def send_email(order):
         app.logger.error(f"Error enviando email: {e}")
 
 
-def send_discord(order):
-    if not DISCORD_WEBHOOK:
-        app.logger.warning("DISCORD_WEBHOOK no configurado")
+def send_ntfy(order):
+    if not NTFY_TOPIC:
+        app.logger.warning("NTFY_TOPIC no configurado")
         return
     tipo = "COMPRA ONLINE" if order["type"] == "buy" else "RESERVA EN TIENDA"
     c = order["customer"]
-    items_text = "\n".join([f"• {i['name']} ({i['type']}) - {i['price']} €" for i in order["items"]])
+    items_text = "\n".join([f"- {i['name']} ({i['type']}) - {i['price']} EUR" for i in order["items"]])
     estado = order.get("status", "pendiente")
-    pago_id = order.get("stripe_payment_id", "N/A")
+    badge = "[PAGADO]" if estado == "pagado" else "[PENDIENTE]"
 
-    color = 0x2a6e3f if estado == "pagado" else 0x8b6914 if estado == "pendiente" else 0x8f2a2a
-
-    payload = {
-        "embeds": [{
-            "title": f"🛒 {tipo} - #{order['id']}",
-            "color": color,
-            "fields": [
-                {"name": "Cliente", "value": c.get("name", ""), "inline": True},
-                {"name": "Email", "value": c.get("email", ""), "inline": True},
-                {"name": "Teléfono", "value": c.get("phone", ""), "inline": True},
-                {"name": "Productos", "value": items_text or "Ninguno", "inline": False},
-                {"name": "Total", "value": f"{order.get('total', 0)} €", "inline": True},
-                {"name": "Estado", "value": estado.upper(), "inline": True},
-                {"name": "Stripe ID", "value": pago_id, "inline": False},
-            ],
-            "footer": {"text": f"La Guarida del Tiempo - {order.get('date', '')[:10]}"}
-        }]
-    }
+    title = f"{badge} {tipo} - {c.get('name', '')} - {order.get('total', 0)} EUR"
+    msg = (
+        f"Ref: {order['id']}\n"
+        f"Cliente: {c.get('name', '')}\n"
+        f"Email: {c.get('email', '')}\n"
+        f"Telefono: {c.get('phone', '')}\n"
+        f"Productos:\n{items_text}\n"
+        f"Total: {order.get('total', 0)} EUR\n"
+        f"Estado: {estado.upper()}\n"
+        f"Stripe ID: {order.get('stripe_payment_id', 'N/A')}"
+    )
 
     try:
         import urllib.request
-        data = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            DISCORD_WEBHOOK,
-            data=data,
-            headers={"Content-Type": "application/json"}
+        request = urllib.request.Request(
+            f"https://ntfy.sh/{NTFY_TOPIC}",
+            data=msg.encode("utf-8"),
+            headers={
+                "Title": title,
+                "Tags": "shopping_cart",
+                "Priority": "high" if estado == "pagado" else "default"
+            }
         )
-        response = urllib.request.urlopen(req, timeout=10)
-        app.logger.info(f"Discord OK: {response.status} para pedido {order['id']}")
-    except urllib.error.HTTPError as e:
-        app.logger.error(f"Discord HTTP error: {e.code} - {e.reason}")
-        try:
-            error_body = e.read().decode("utf-8")
-            app.logger.error(f"Discord response: {error_body}")
-        except:
-            pass
+        urllib.request.urlopen(request, timeout=10)
+        app.logger.info(f"ntfy enviado para pedido {order['id']}")
     except Exception as e:
-        app.logger.error(f"Error Discord: {type(e).__name__} - {e}")
+        app.logger.error(f"Error ntfy: {type(e).__name__} - {e}")
 
 
 @app.route("/")
@@ -215,7 +205,9 @@ def success():
         order["stripe_payment_id"] = session_id
         save_order(order)
         threading.Thread(target=send_email, args=(order,), daemon=True).start()
-        threading.Thread(target=send_discord, args=(order,), daemon=True).start()
+        save_order(order)
+    threading.Thread(target=send_email, args=(order,), daemon=True).start()
+    threading.Thread(target=send_ntfy, args=(order,), daemon=True).start()
 
     return render_template("success.html", order_id=order_id or "?")
 
@@ -284,24 +276,17 @@ def test_email():
 
 @app.route("/test-discord")
 def test_discord():
-    import urllib.request, urllib.error
-    payload = json.dumps({
-        "content": "Test directo desde Render",
-        "embeds": [{"title": "Test", "description": "Si ves esto, Discord funciona", "color": 5198079}]
-    }).encode("utf-8")
-    try:
-        req = urllib.request.Request(
-            DISCORD_WEBHOOK,
-            data=payload,
-            headers={"Content-Type": "application/json"}
-        )
-        resp = urllib.request.urlopen(req, timeout=15)
-        return f"OK - Status: {resp.status}<br>Webhook: {DISCORD_WEBHOOK[:60]}..."
-    except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8", errors="replace")
-        return f"HTTP ERROR: {e.code} {e.reason}<br>Body: {body}", 500
-    except Exception as e:
-        return f"ERROR: {type(e).__name__}: {e}", 500
+    test_order = {
+        "id": "TEST001",
+        "type": "reserve",
+        "customer": {"name": "Test Cliente", "email": "test@test.com", "phone": "+34600000000"},
+        "items": [{"name": "Dragon del Vacio Atemporal", "price": "1200", "type": "legendary"}],
+        "total": 1200,
+        "status": "pendiente",
+        "date": datetime.now().isoformat()
+    }
+    send_ntfy(test_order)
+    return f"Notificacion enviada a ntfy.sh/{NTFY_TOPIC} - descarga la app ntfy y suscribete a ese topic"
 
 
 if __name__ == "__main__":
