@@ -214,6 +214,22 @@ def get_orders():
     return jsonify(load_orders())
 
 
+@app.route("/pedidos")
+def pedidos():
+    return render_template("pedidos.html", orders=load_orders())
+
+
+@app.route("/test-email")
+def test_email():
+    import smtplib
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+            server.login(GMAIL_USER, GMAIL_PASS.replace(" ", ""))
+        return f"OK - Conexion SMTP exitosa con {GMAIL_USER}"
+    except Exception as e:
+        return f"ERROR SMTP: {e}", 500
+
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
     app.run(host="0.0.0.0", port=port, debug=False)
