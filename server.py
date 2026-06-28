@@ -78,11 +78,16 @@ def send_email(order):
     msg.attach(MIMEText(html, "html"))
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
             server.login(GMAIL_USER, GMAIL_PASS.replace(" ", ""))
             server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
+        app.logger.info(f"Email enviado para pedido {order['id']}")
+    except smtplib.SMTPAuthenticationError:
+        app.logger.error(f"Error autenticacion Gmail - verifica GMAIL_USER y GMAIL_PASS")
+    except smtplib.SMTPConnectError:
+        app.logger.error(f"No se pudo conectar a smtp.gmail.com - posible bloqueo del proveedor")
     except Exception as e:
-        print(f"Error enviando email: {e}")
+        app.logger.error(f"Error enviando email: {e}")
 
 
 @app.route("/")
