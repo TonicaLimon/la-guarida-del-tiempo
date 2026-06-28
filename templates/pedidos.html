@@ -20,26 +20,26 @@ tr:hover { background:rgba(201,164,75,0.05) }
 .badge-pendiente_pago { background:#2a5f8f;color:#e0f0ff }
 .items { font-size:0.8rem;color:#9a94a8;max-width:250px }
 .empty { text-align:center;padding:60px;color:#9a94a8;font-size:1.1rem }
-a { color:#c9a44b;display:inline-block;margin-bottom:24px;text-decoration:none }
-a:hover { text-decoration:underline }
+nav a { color:#c9a44b;display:inline-block;margin-bottom:24px;text-decoration:none }
+nav a:hover { text-decoration:underline }
 @media (max-width:768px) { table { font-size:0.75rem } th,td { padding:8px } }
 </style>
 </head>
 <body>
-<a href="/">&larr; Volver a la tienda</a>
+<nav><a href="/">&larr; Volver a la tienda</a></nav>
 <h1>Pedidos</h1>
 {% if orders %}
 <table>
 <tr><th>Ref</th><th>Fecha</th><th>Cliente</th><th>Email</th><th>Productos</th><th>Total</th><th>Estado</th></tr>
 {% for o in orders|reverse %}
 <tr>
-  <td>{{ o.id }}</td>
-  <td>{{ o.get('date','')[:16] }}</td>
-  <td>{{ o.customer.name }}</td>
-  <td>{{ o.customer.email }}</td>
-  <td class="items">{% for i in o.items %}{{ i.name }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
-  <td>{{ o.total }} &euro;</td>
-  <td><span class="badge badge-{{ o.get('status','pendiente') }}">{{ o.get('status','pendiente') }}</span></td>
+  <td>{{ o["id"] }}</td>
+  <td>{{ o.get("date", "")[:16] }}</td>
+  <td>{{ o["customer"]["name"] }}</td>
+  <td>{{ o["customer"]["email"] }}</td>
+  <td class="items">{% for i in o["items"] %}{{ i["name"] }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+  <td>{{ o["total"] }} &euro;</td>
+  <td><span class="badge badge-{{ o.get('status','pendiente') }}">{{ o.get("status","pendiente") }}</span></td>
 </tr>
 {% endfor %}
 </table>
