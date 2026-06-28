@@ -19,8 +19,8 @@ GMAIL_USER = os.getenv("GMAIL_USER", "davidnavarrosereno15@gmail.com")
 GMAIL_PASS = os.getenv("GMAIL_PASS", "")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
-
 YOUR_DOMAIN = os.getenv("YOUR_DOMAIN", "http://192.168.0.32:8080")
+DISCORD_WEBHOOK = os.getenv("DISCORD_WEBHOOK", "")
 
 
 def load_orders():
@@ -88,6 +88,49 @@ def send_email(order):
         app.logger.error(f"No se pudo conectar a smtp.gmail.com - posible bloqueo del proveedor")
     except Exception as e:
         app.logger.error(f"Error enviando email: {e}")
+
+
+def send_discord(order):
+    if not DISCORD_WEBHOOK:
+        app.logger.warning("DISCORD_WEBHOOK no configurado")
+        return
+    tipo = "COMPRA ONLINE" if order["type"] == "buy" else "RESERVA EN TIENDA"
+    c = order["customer"]
+    items_text = "\n".join([f"• {i['name']} ({i['type']}) - {i['price']} €" for i in order["items"]])
+    estado = order.get("status", "pendiente")
+    pago_id = order.get("stripe_payment_id", "N/A")
+
+    color = 0x2a6e3f if estado == "pagado" else 0x8b6914 if estado == "pendiente" else 0x8f2a2a
+
+    payload = {
+        "embeds": [{
+            "title": f"🛒 {tipo} - #{order['id']}",
+            "color": color,
+            "fields": [
+                {"name": "Cliente", "value": c.get("name", ""), "inline": True},
+                {"name": "Email", "value": c.get("email", ""), "inline": True},
+                {"name": "Teléfono", "value": c.get("phone", ""), "inline": True},
+                {"name": "Productos", "value": items_text or "Ninguno", "inline": False},
+                {"name": "Total", "value": f"{order.get('total', 0)} €", "inline": True},
+                {"name": "Estado", "value": estado.upper(), "inline": True},
+                {"name": "Stripe ID", "value": pago_id, "inline": False},
+            ],
+            "footer": {"text": f"La Guarida del Tiempo - {order.get('date', '')[:10]}"}
+        }]
+    }
+
+    try:
+        import urllib.request
+        data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            DISCORD_WEBHOOK,
+            data=data,
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=10):
+            app.logger.info(f"Discord notif enviado para pedido {order['id']}")
+    except Exception as e:
+        app.logger.error(f"Error Discord: {e}")
 
 
 @app.route("/")
@@ -165,6 +208,7 @@ def success():
         order["stripe_payment_id"] = session_id
         save_order(order)
         threading.Thread(target=send_email, args=(order,), daemon=True).start()
+        threading.Thread(target=send_discord, args=(order,), daemon=True).start()
 
     return render_template("success.html", order_id=order_id or "?")
 
@@ -206,6 +250,7 @@ def reserve_order():
     }
     save_order(order)
     threading.Thread(target=send_email, args=(order,), daemon=True).start()
+    threading.Thread(target=send_discord, args=(order,), daemon=True).start()
     return jsonify({"id": order_id, "status": "pendiente"})
 
 
