@@ -284,18 +284,22 @@ def test_email():
 
 @app.route("/test-discord")
 def test_discord():
-    test_order = {
-        "id": "TEST001",
-        "type": "reserve",
-        "customer": {"name": "Test Cliente", "email": "test@test.com", "phone": "+34600000000"},
-        "items": [{"name": "Dragon del Vacio Atemporal", "price": "1200", "type": "legendary"}],
-        "total": 1200,
-        "status": "pendiente",
-        "date": datetime.now().isoformat()
-    }
+    import urllib.request, urllib.error
+    payload = json.dumps({
+        "content": "Test directo desde Render",
+        "embeds": [{"title": "Test", "description": "Si ves esto, Discord funciona", "color": 5198079}]
+    }).encode("utf-8")
     try:
-        send_discord(test_order)
-        return "Discord test enviado, mira tu Discord (revisa logs si no llega)"
+        req = urllib.request.Request(
+            DISCORD_WEBHOOK,
+            data=payload,
+            headers={"Content-Type": "application/json"}
+        )
+        resp = urllib.request.urlopen(req, timeout=15)
+        return f"OK - Status: {resp.status}<br>Webhook: {DISCORD_WEBHOOK[:60]}..."
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")
+        return f"HTTP ERROR: {e.code} {e.reason}<br>Body: {body}", 500
     except Exception as e:
         return f"ERROR: {type(e).__name__}: {e}", 500
 
